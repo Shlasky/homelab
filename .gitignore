@@ -1,0 +1,72 @@
+# Obsidian workspace files (personal settings)
+.obsidian/workspace*
+.obsidian/cache
+.trash/
+
+# Operating System
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.crt
+secrets/
+credentials/
+
+# But allow example files
+!.env.example
+!.env.*.example
+
+# Docker volumes and runtime data
+*/data/
+*/volumes/
+*/cache/
+*_data/
+
+# Logs
+*.log
+logs/
+
+# Backup files
+*.bak
+*.backup
+backups/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database files (keep configs, not data)
+*.db
+*.sqlite
+*.sql.gz
+
+# Personal notes you don't want to share
+PERSONAL.md
+PASSWORDS.md
+private/
+
+# Large media files 
+*.iso
+*.img
+*.mp4
+*.mkv
+*.avi
+
+# IDE specific
+.vscode/
+.idea/
+*.code-workspace
+
+# Traefik
+traefik/traefik.yml
+traefik/dynamic/
+traefik/acme/

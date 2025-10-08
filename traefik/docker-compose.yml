@@ -1,0 +1,45 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"     
+      - "443:443"   
+      - "8080:8080"   # Only through tailscale
+    environment:
+      - TZ=${TZ}
+      - CF_API_EMAIL=${CF_API_EMAIL}
+      - CF_DNS_API_TOKEN=${CF_API_KEY}
+    volumes:
+      # Traefik config files
+      - ./traefik.yml:/traefik.yml:ro
+      - ./dynamic:/dynamic:ro
+      # Certificate storage
+      - ./acme/acme.json:/acme.json
+      # Docker socket (for service discovery)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik_public
+      - traefik_admin
+    labels:
+      - "traefik.enable=true"
+      # Dashboard Router (admin subdomain via Tailscale)
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${ADMIN_DOMAIN}`) || Host(`proxy.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=dashboard-auth"
+      # Dashboard Authentication Middleware
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=${DASHBOARD_PASSWORD_HASH}"
+
+networks:
+  traefik_public:
+    name: traefik_public
+    driver: bridge
+  traefik_admin:
+    name: traefik_admin
+    driver: bridge
