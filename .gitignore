@@ -67,6 +67,5 @@ private/
 *.code-workspace
 
 # Traefik
-traefik/traefik.yml
 traefik/dynamic/
 traefik/acme/
