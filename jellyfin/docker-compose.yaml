@@ -13,8 +13,8 @@ services:
     networks:
       - traefik_public
       - traefik_admin
-    # devices:
-      # - /dev/dri:/dev/dri  # For Intel GPU transcoding
+    devices:
+      - /dev/dri:/dev/dri  # For Intel GPU transcoding
     labels:
       - "traefik.enable=true"
 
@@ -26,7 +26,7 @@ services:
       - "traefik.http.routers.jellyfin-public.middlewares=security-headers@file,compression@file"
       
       # Admin Jellyfin (via Tailscale - better quality)
-      - "traefik.http.routers.jellyfin-admin.rule=Host(`admintv.${DOMAIN}`) || Host(`tv.${ADMIN_DOMAIN}"
+      - "traefik.http.routers.jellyfin-admin.rule=Host(`admintv.${DOMAIN}`) || Host(`tv.${ADMIN_DOMAIN}`)"
       - "traefik.http.routers.jellyfin-admin.entrypoints=websecure"
       - "traefik.http.routers.jellyfin-admin.tls=true"
       - "traefik.http.routers.jellyfin-admin.tls.certresolver=letsencrypt"
