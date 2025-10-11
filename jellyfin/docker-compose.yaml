@@ -1,0 +1,42 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    user: 1000:1000
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - /srv/jellyfin/config:/config
+      - /srv/jellyfin/cache:/cache
+      - /mnt/media/jellyfin/media:/media:ro  # Read-only for safety
+    networks:
+      - traefik_public
+      - traefik_admin
+    # devices:
+      # - /dev/dri:/dev/dri  # For Intel GPU transcoding
+    labels:
+      - "traefik.enable=true"
+
+      # Public Jellyfin (accessible via internet)
+      - "traefik.http.routers.jellyfin-public.rule=Host(`tv.${DOMAIN}`) || Host(`shnetflix.${DOMAIN}`)"
+      - "traefik.http.routers.jellyfin-public.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin-public.tls=true"
+      - "traefik.http.routers.jellyfin-public.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.jellyfin-public.middlewares=security-headers@file,compression@file"
+      
+      # Admin Jellyfin (via Tailscale - better quality)
+      - "traefik.http.routers.jellyfin-admin.rule=Host(`admintv.${DOMAIN}`) || Host(`tv.${ADMIN_DOMAIN}"
+      - "traefik.http.routers.jellyfin-admin.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin-admin.tls=true"
+      - "traefik.http.routers.jellyfin-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.jellyfin-admin.middlewares=security-headers@file"
+      
+      # Service configuration
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+
+networks:
+  traefik_public:
+    external: true
+  traefik_admin:
+    external: true

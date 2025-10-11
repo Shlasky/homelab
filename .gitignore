@@ -70,3 +70,7 @@ private/
 traefik/traefik.yml
 traefik/dynamic/
 traefik/acme/
+
+# Jellyfin
+jellyfin/config/
+jellyfin/cache/
