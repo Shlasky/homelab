@@ -39,3 +39,13 @@ providers:
     network: traefik_public  # Default network for services
   file:
     directory: /dynamic
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  format: json
+  bufferingSize: 100
+  filters:
+    statusCodes:
+      - "200-299"
+      - "400-499"
+      - "500-599"

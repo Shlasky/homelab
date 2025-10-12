@@ -21,6 +21,8 @@ services:
       - ./acme/acme.json:/acme.json
       # Docker socket (for service discovery)
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Logs
+      - ./logs:/var/log/traefik
     networks:
       - traefik_public
       - traefik_admin
