@@ -73,3 +73,9 @@ traefik/acme/
 # Jellyfin
 jellyfin/config/
 jellyfin/cache/
+
+# Torrent
+torrent/gluetun
+torrent/qbittorrent
+!torrent/qbittorrent/config/qBittorrent/qBittorrent*.conf
+wireguard.conf
