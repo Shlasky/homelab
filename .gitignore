@@ -79,3 +79,9 @@ torrent/gluetun
 torrent/qbittorrent
 !torrent/qbittorrent/config/qBittorrent/qBittorrent*.conf
 wireguard.conf
+
+# Arr Stack
+bazarr/
+prowlarr/
+sonarr/
+radarr/
