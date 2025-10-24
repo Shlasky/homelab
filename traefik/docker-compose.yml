@@ -9,6 +9,7 @@ services:
       - "80:80"     
       - "443:443"   
       - "8080:8080"   # Only through tailscale
+      - "8082:8082"   # Metrics Endpoint
     environment:
       - TZ=${TZ}
       - CF_API_EMAIL=${CF_API_EMAIL}

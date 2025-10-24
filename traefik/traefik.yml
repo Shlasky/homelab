@@ -3,6 +3,19 @@ api:
   dashboard: true
   insecure: true  
 
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    entryPoint: metrics  # Expose on dedicated entry point
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.0
+      - 3.0
+      - 10.0
+
 # Entry Points 
 entryPoints:
   web:
@@ -17,6 +30,8 @@ entryPoints:
     http:
       tls:
         certResolver: letsencrypt
+  metrics:
+    address: ":8082"
 
 # Certificate Resolver (Let's Encrypt)
 certificatesResolvers:
