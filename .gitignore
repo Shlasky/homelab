@@ -86,3 +86,6 @@ bazarr/
 prowlarr/
 sonarr/
 radarr/
+
+# DB
+**/*/data/
