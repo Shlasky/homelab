@@ -89,3 +89,7 @@ radarr/
 
 # DB
 **/*/data/
+
+# Registry
+registry/auth/*
+

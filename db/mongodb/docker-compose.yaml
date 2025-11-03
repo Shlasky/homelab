@@ -55,6 +55,25 @@ services:
       - "traefik.http.routers.mongo-express.tls.certresolver=letsencrypt"
       - "traefik.http.routers.mongo-express.middlewares=security-headers@file"
       - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
+  
+  mongo-exporter:
+    image: percona/mongodb_exporter:0.40
+    container_name: mongo-exporter
+    restart: unless-stopped
+    ports:
+      - "9216:9216"
+    environment:
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_USER}@mongodb:27017
+      - TZ=${TZ}
+    networks:
+      - mongodb
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    command:
+      - '--mongodb.uri=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongodb:27017'
+      - '--collect-all'
+      - '--compatible-mode'
 
 networks:
   mongodb:
