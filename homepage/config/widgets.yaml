@@ -2,11 +2,22 @@
 # For configuration options and examples, please see:
 # https://gethomepage.dev/configs/info-widgets/
 
+- greeting:
+    text_size: xl
+    text: "Shloud Hub"
+
 - resources:
     cpu: true
     memory: true
     disk: /
 
 - search:
-    provider: duckduckgo
+    provider: google
     target: _blank
+
+- datetime:
+    text_size: xl
+    format:
+      timeStyle: short
+      dateStyle: short
+      hourCycle: h23

@@ -3,19 +3,22 @@ services:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     volumes:
-      - ./config:/app/config # Make sure your local config directory exists
-      - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations
+      - ./config:/app/config 
+      - /var/run/docker.sock:/var/run/docker.sock # 
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: ${ALLOWED_HOSTS:-www.${DOMAIN}}
       PUID: ${PUID}
       GUID: ${GUID}
       TZ: ${TZ}
+
+      HOMEPAGE_ALLOWED_HOSTS: ${ALLOWED_HOSTS:-www.${DOMAIN}}
+      HOMEPAGE_VAR_JELLYFIN_API_KEY: ${HOMEPAGE_VAR_JELLYFIN_API_KEY}
+      HOMEPAGE_VAR_JELLYSEERR_API_KEY: ${HOMEPAGE_VAR_JELLYSEERR_API_KEY}
     networks:
       - traefik_public
     labels:
       - "traefik.enable=true"
 
-      - "traefik.http.routers.homepage.rule=Host(`home.${DOMAIN}`) || Host(`www.${DOMAIN}`)"
+      - "traefik.http.routers.homepage.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
       - "traefik.http.routers.homepage.entrypoints=websecure"
       - "traefik.http.routers.homepage.tls=true"
       - "traefik.http.routers.homepage.tls.certresolver=letsencrypt"

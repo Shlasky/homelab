@@ -1,18 +1,51 @@
 ---
-# For configuration options and examples, please see:
-# https://gethomepage.dev/configs/services/
+# Public Homepage Services
 
-- My First Group:
-    - My First Service:
-        href: http://localhost/
-        description: Homepage is awesome
+- Shnetflix:
+    - Shnetflix:
+        icon: jellyfin.png
+        href: https://tv.ashlasky.com
+        description: Stream movies and TV shows
+        widget:
+          type: jellyfin
+          url: https://tv.ashlasky.com
+          key: {{HOMEPAGE_VAR_JELLYFIN_API_KEY}} # Add API key to .env file
+          enableBlocks: true
+          enableNowPlaying: false # Privacy - don't show what's playing
 
-- My Second Group:
-    - My Second Service:
-        href: http://localhost/
-        description: Homepage is the best
+    - Request Content:
+        icon: jellyseerr.png
+        href: https://request.ashlasky.com
+        description: Request movies and shows
+        widget:
+          type: jellyseerr
+          url: https://request.ashlasky.com
+          key: {{HOMEPAGE_VAR_JELLYSEERR_API_KEY}} # Add API key to .env file
 
-- My Third Group:
-    - My Third Service:
-        href: http://localhost/
-        description: Homepage is 😎
+- About:
+    - Welcome to The Shloud:
+        icon: mdi-server-network
+        href: "#"
+        description: |
+          Hey there! Welcome to my personal homelab - a space where I host media services for friends and family while building and showcasing my DevOps skills.
+
+          This entire infrastructure runs on self-hosted, open-source solutions:
+          • Docker containers orchestrated across multiple servers
+          • Automated with Traefik reverse proxy
+          • Secured with Cloudflare
+          • Monitored through Prometheus and Grafana
+          
+          It's a continuous learning project demonstrating infrastructure automation, container orchestration, and system reliability engineering.
+
+          Whether you're here to stream your favorite shows or check out my technical work - enjoy exploring!
+
+- Contacts:
+    - Resume:
+        icon: mdi-file-account
+        href: https://resume.ashlasky.com
+        description: Professional background and skills
+
+    - GitHub:
+        icon: mdi-github
+        href: https://github.com/Shlasky
+        description: Check out my projects

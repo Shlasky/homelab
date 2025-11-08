@@ -1,7 +1,49 @@
 ---
-# For configuration options and examples, please see:
-# https://gethomepage.dev/configs/settings/
+# Public Homepage Settings
 
-providers:
-  openweathermap: openweathermapapikey
-  weatherapi: weatherapiapikey
+# Page title and branding
+title: Shloud Hub
+favicon: https://cdn-icons-png.flaticon.com/512/2593/2593635.png
+
+# Appearance
+theme: dark
+color: slate
+
+# Layout options
+layout:
+  Shnetflix:
+    style: row
+    columns: 2
+  About:
+    style: row
+    columns: 1
+  Contacts:
+    style: row
+    columns: 2
+
+# Background
+background:
+  image: https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920
+  blur: sm
+  saturate: 50
+  brightness: 50
+  opacity: 20
+
+# Hide or show elements
+hideVersion: true
+hideErrors: false
+
+# Quick launch
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: false
+  hideVisitURL: false
+
+# Language
+language: en
+
+# Status style
+statusStyle: "dot"
+
+# Header style
+headerStyle: "boxed"
