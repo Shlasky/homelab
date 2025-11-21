@@ -1,0 +1,66 @@
+services:
+  # Public Documentation (wiki.ashlasky.com)
+  wiki-nginx:
+    image: nginx:alpine
+    container_name: docs-wiki-nginx
+    restart: unless-stopped
+    volumes:
+      - ./site-public:/usr/share/nginx/html:ro
+    networks:
+      - traefik_public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_public"
+
+      # Public wiki route
+      - "traefik.http.routers.wiki.rule=Host(`wiki.${DOMAIN}`)"
+      - "traefik.http.routers.wiki.entrypoints=websecure"
+      - "traefik.http.routers.wiki.tls=true"
+      - "traefik.http.routers.wiki.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.wiki.middlewares=security-headers@file,compression@file"
+
+      # Service configuration
+      - "traefik.http.services.wiki.loadbalancer.server.port=80"
+
+  # Private/Admin Documentation (docs.ashlasky.com)
+  docs-nginx:
+    image: nginx:alpine
+    container_name: docs-admin-nginx
+    restart: unless-stopped
+    volumes:
+      - ./site-private:/usr/share/nginx/html:ro
+    networks:
+      - traefik_admin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_admin"
+
+      # Admin docs route (VPN/Tailscale only)
+      - "traefik.http.routers.docs-admin.rule=Host(`docs.${DOMAIN}`) || Host(`docs.${ADMIN_DOMAIN}`)"
+      - "traefik.http.routers.docs-admin.entrypoints=websecure"
+      - "traefik.http.routers.docs-admin.tls=true"
+      - "traefik.http.routers.docs-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.docs-admin.middlewares=security-headers@file"
+
+      # Service configuration
+      - "traefik.http.services.docs-admin.loadbalancer.server.port=80"
+
+  # Development Server (optional - not started by default)
+  #  mkdocs-dev:
+  #    image: squidfunk/mkdocs-material:latest
+  #    container_name: docs-dev-server
+  #    profiles:
+  #      - dev  # Only runs when explicitly started
+  #    volumes:
+  #      - ./:/docs
+  #    ports:
+  #      - "8000:8000"
+  #    command: serve --dev-addr=0.0.0.0:8000 --config-file=/docs/mkdocs-public.yml
+  #    networks:
+  #      - traefik_admin
+
+networks:
+  traefik_public:
+    external: true
+  traefik_admin:
+    external: true

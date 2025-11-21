@@ -1,0 +1,35 @@
+# Built documentation sites
+site-public/
+site-private/
+
+# Environment files
+.env
+.env.local
+
+# MkDocs cache
+.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Editor
+.vscode/
+.idea/
+*.code-workspace
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
