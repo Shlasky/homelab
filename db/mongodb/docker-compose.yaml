@@ -49,6 +49,7 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik_admin"
       - "traefik.http.routers.mongo-express.rule=Host(`mongodb.${ADMIN_DOMAIN}`) || Host(`mongo.${DOMAIN}`)"
       - "traefik.http.routers.mongo-express.entrypoints=websecure"
       - "traefik.http.routers.mongo-express.tls=true"
