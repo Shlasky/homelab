@@ -1,0 +1,8 @@
+---
+
+mothership:
+  socket: /var/run/docker.sock
+
+pi:
+  host: 100.69.41.30
+  port: 2375

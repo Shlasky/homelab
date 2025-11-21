@@ -1,0 +1,40 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage-admin
+    volumes:
+      - ./config:/app/config 
+      - /var/run/docker.sock:/var/run/docker.sock 
+    environment:
+      PUID: ${PUID}
+      GUID: ${GUID}
+      TZ: ${TZ}
+
+      HOMEPAGE_ALLOWED_HOSTS: ${ADMIN_DOMAIN}
+      HOMEPAGE_VAR_JELLYFIN_API_KEY: ${HOMEPAGE_VAR_JELLYFIN_API_KEY}
+      HOMEPAGE_VAR_JELLYSEERR_API_KEY: ${HOMEPAGE_VAR_JELLYSEERR_API_KEY}
+      HOMEPAGE_VAR_RADARR_API_KEY: ${HOMEPAGE_VAR_RADARR_API_KEY}
+      HOMEPAGE_VAR_SONARR_API_KEY: ${HOMEPAGE_VAR_SONARR_API_KEY}
+      HOMEPAGE_VAR_BAZARR_API_KEY: ${HOMEPAGE_VAR_BAZARR_API_KEY}
+      HOMEPAGE_VAR_PROWLARR_API_KEY: ${HOMEPAGE_VAR_PROWLARR_API_KEY}
+      HOMEPAGE_VAR_QBITTORRENT_USER: ${HOMEPAGE_VAR_QBITTORRENT_USER}
+      HOMEPAGE_VAR_QBITTORRENT_PASSWORD: ${HOMEPAGE_VAR_QBITTORRENT_PASSWORD}
+      HOMEPAGE_VAR_GRAFANA_USER: ${HOMEPAGE_VAR_GRAFANA_USER}
+      HOMEPAGE_VAR_GRAFANA_PASSWORD: ${HOMEPAGE_VAR_GRAFANA_PASSWORD}
+    networks:
+      - traefik_admin
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.homepage-admin.rule=Host(`${ADMIN_DOMAIN}`)"
+      - "traefik.http.routers.homepage-admin.entrypoints=websecure"
+      - "traefik.http.routers.homepage-admin.tls=true"
+      - "traefik.http.routers.homepage-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.homepage-admin.middlewares=security-headers@file"
+      
+      # Service configuration
+      - "traefik.http.services.homepage-admin.loadbalancer.server.port=3000"
+
+networks:
+  traefik_admin:
+    external: true

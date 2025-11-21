@@ -1,0 +1,96 @@
+/* Custom CSS for Admin Homepage */
+
+/* Enable multiline descriptions */
+.service-description {
+  white-space: pre-wrap !important;
+}
+
+/* Make System Status cards more prominent */
+[data-group="System Status"] .service-card {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Highlight infrastructure services */
+[data-group="Infrastructure"] .service-card {
+  border-left: 3px solid #10b981;
+}
+
+/* Make widget stats more visible */
+.service-stats {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Docker container status badges */
+.docker-status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.docker-status.running {
+  background: #10b981;
+  color: white;
+}
+
+.docker-status.stopped {
+  background: #ef4444;
+  color: white;
+}
+
+/* Resource widget customization */
+.resources-widget {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Server labels */
+.server-label {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Quick action buttons */
+.service-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.service-actions button {
+  padding: 0.25rem 0.75rem;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 0.25rem;
+  color: #10b981;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.service-actions button:hover {
+  background: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+
+/* Monitoring section styling */
+[data-group="Monitoring"] .service-card {
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+/* Make greeting more personal */
+.greeting-text {
+  background: linear-gradient(90deg, #10b981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}

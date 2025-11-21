@@ -1,0 +1,212 @@
+---
+# Admin Homepage Services
+
+# System Status Overview
+- System Status:
+    - Mothership Status:
+        icon: mdi-server
+        description: Primary Server
+        widget:
+          type: glances
+          url: http://localhost:61208  # If you install glances
+          metric: info
+        server: mothership
+        container: node-exporter-mothership
+        
+    - Raspberry Pi Status:
+        icon: mdi-raspberry-pi
+        description: Monitoring & Backups Server
+        widget:
+          type: glances
+          url: #    #http://100.69.41.30:61208  # Replace with Pi Tailscale IP
+          metric: info
+        server: raspberry-pi
+        # Will show Pi's containers once Docker API is configured
+
+# Core Infrastructure
+- Infrastructure:
+    - Traefik:
+        icon: traefik.png
+        href: https://traefik.admin.ashlasky.com
+        description: Reverse Proxy & Router
+        server: mothership
+        container: traefik
+        widget:
+          type: traefik
+          url: http://10.0.0.48:8080  # Traefik API endpoint
+          
+    - Portainer:
+        icon: portainer.png
+        href: https://portainer.admin.ashlasky.com
+        description: Container Management
+        server: raspberry-pi  # Portainer main instance on Pi
+        # Add container name when you know it
+        widget:
+          type: portainer
+          url: #
+          env: 1
+          key: {{HOMEPAGE_VAR_PORTAINER_API_KEY}}
+          
+    - Grafana:
+        icon: grafana.png
+        href: https://grafana.admin.ashlasky.com
+        description: Metrics Visualization
+        server: raspberry-pi
+        # Add container name
+        widget:
+          type: grafana
+          url: https://monitor.ashlasky.com
+          username: {{HOMEPAGE_VAR_GRAFANA_USER}}
+          password: {{HOMEPAGE_VAR_GRAFANA_PASSWORD}}
+          
+    - Prometheus:
+        icon: prometheus.png  
+        href: https://prometheus.admin.ashlasky.com
+        description: Metrics Collection
+        server: raspberry-pi
+        # Add container name
+        widget:
+          type: prometheus
+          url: http://PI_TAILSCALE_IP:9090
+
+# Media Automation Stack
+- Arr Stack:
+    - Prowlarr:
+        icon: prowlarr.png
+        href: https://prowlarr.admin.ashlasky.com
+        description: Indexer Manager
+        server: mothership
+        container: prowlarr
+        widget:
+          type: prowlarr
+          url: http://10.0.0.48:9696
+          key: {{HOMEPAGE_VAR_PROWLARR_API_KEY}}
+          
+    - Radarr:
+        icon: radarr.png
+        href: https://radarr.admin.ashlasky.com
+        description: Movie Automation
+        server: mothership
+        container: radarr
+        widget:
+          type: radarr
+          url: http://10.0.0.48:7878
+          key: {{HOMEPAGE_VAR_RADARR_API_KEY}}
+          enableQueue: true
+          
+    - Sonarr:
+        icon: sonarr.png
+        href: https://sonarr.admin.ashlasky.com
+        description: TV Show Automation
+        server: mothership
+        container: sonarr
+        widget:
+          type: sonarr
+          url: http://10.0.0.48:8989
+          key: {{HOMEPAGE_VAR_SONARR_API_KEY}}
+          enableQueue: true
+          
+    - Bazarr:
+        icon: bazarr.png
+        href: https://bazarr.admin.ashlasky.com
+        description: Subtitle Automation
+        server: mothership
+        container: bazarr
+        widget:
+          type: bazarr
+          url: http://10.0.0.48:6767
+          key: {{HOMEPAGE_VAR_BAZARR_API_KEY}}
+
+# Download Clients
+- Downloads:
+    - qBittorrent:
+        icon: qbittorrent.png
+        href: https://torrent.admin.ashlasky.com
+        description: Torrent Client
+        server: mothership
+        container: qbittorrent
+        widget:
+          type: qbittorrent
+          url: http://10.0.0.48:8090
+          username: {{HOMEPAGE_VAR_QBITTORRENT_USER}}
+          password: {{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}
+          
+    - Gluetun VPN:
+        icon: mdi-shield-lock
+        href: "#"
+        description: VPN Container
+        server: mothership
+        container: gluetun
+        # Gluetun doesn't have a widget, but shows container stats
+
+# Streaming Services
+- Shnetflix:
+    - Jellyfin:
+        icon: jellyfin.png
+        href: https://tv.{{HOMEPAGE_VAR_DOMAIN}}
+        description: Media Server (Admin)
+        server: mothership
+        container: jellyfin
+        widget:
+          type: jellyfin
+          url: http://10.0.0.48:8096
+          key: {{HOMEPAGE_VAR_JELLYFIN_API_KEY}}
+          enableBlocks: true
+          enableNowPlaying: true  # Admin can see what's playing
+          
+    - Jellyseerr:
+        icon: jellyseerr.png
+        href: https://request.ashlasky.com
+        description: Content Requests
+        server: mothership
+        container: jellyseerr
+        widget:
+          type: jellyseerr
+          url: http://10.0.0.48:5055
+          key: {{HOMEPAGE_VAR_JELLYSEERR_API_KEY}}
+
+# Data & Storage
+- Data & Storage:
+    - MongoDB:
+        icon: mongodb.png
+        href: https://mongodb.admin.ashlasky.com
+        description: NoSQL Database
+        server: mothership
+        container: mongodb
+        
+    - Mongo Express:
+        icon: mongodb.png
+        href: https://mongodb.admin.ashlasky.com
+        description: MongoDB Web UI
+        server: mothership
+        container: mongo-express
+        
+    - Docker Registry:
+        icon: docker.png
+        href: https://registry.ashlasky.com
+        description: Private Container Registry
+        server: mothership
+        container: registry
+
+# Monitoring & Metrics
+- Monitoring:
+    - Node Exporter (Mothership):
+        icon: prometheus.png
+        href: http://10.0.0.48:9100/metrics
+        description: System Metrics
+        server: mothership
+        container: node-exporter-mothership
+        
+    - cAdvisor (Mothership):
+        icon: mdi-docker
+        href: http://10.0.0.48:8081
+        description: Container Metrics
+        server: mothership
+        container: cadvisor-mothership
+        
+    - Mongo Exporter:
+        icon: mongodb.png
+        href: http://10.0.0.48:9216/metrics
+        description: MongoDB Metrics
+        server: mothership
+        container: mongo-exporter

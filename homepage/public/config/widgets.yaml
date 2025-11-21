@@ -6,11 +6,6 @@
     text_size: xl
     text: "Shloud Hub"
 
-- resources:
-    cpu: true
-    memory: true
-    disk: /
-
 - search:
     provider: google
     target: _blank

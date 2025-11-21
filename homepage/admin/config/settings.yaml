@@ -1,0 +1,64 @@
+---
+# Admin Homepage Settings
+
+# Page title and branding
+title: Shloud Control Center
+favicon: https://cdn-icons-png.flaticon.com/512/2920/2920277.png
+
+# Appearance
+theme: dark
+color: slate
+
+# Layout options
+layout:
+  System Status:
+    style: row
+    columns: 2
+  Infrastructure:
+    style: row
+    columns: 4
+  Media Automation:
+    style: row
+    columns: 4
+  Downloads:
+    style: row
+    columns: 2
+  Streaming:
+    style: row
+    columns: 2
+  Data & Storage:
+    style: row
+    columns: 3
+  Monitoring:
+    style: row
+    columns: 3
+
+# Background - Darker, more technical
+background:
+  image: https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1920
+  blur: md
+  saturate: 70
+  brightness: 30
+  opacity: 30
+
+# Hide or show elements
+hideVersion: true
+hideErrors: false
+
+# Quick launch
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: true
+  hideVisitURL: true
+
+# Language
+language: en
+
+# Status style
+statusStyle: "dot"
+
+# Header style  
+headerStyle: "underlined"
+
+# Show stats on all services
+showStats: true

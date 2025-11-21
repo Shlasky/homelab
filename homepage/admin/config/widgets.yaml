@@ -1,0 +1,35 @@
+---
+# Admin Homepage Widgets
+
+- greeting:
+    text_size: xl
+    text: "Shloud Admin"
+
+- search:
+    provider: google
+    target: _blank
+    focus: false
+
+# Mothership System Resources
+- resources:
+    label: Mothership
+    expanded: true
+    cpu: true
+    memory: true
+    disk: /
+    uptime: true
+
+- datetime:
+    text_size: l
+    format:
+      timeStyle: short
+      dateStyle: short
+      hourCycle: h23
+
+# Raspberry Pi Resources (requires glances or similar on Pi)
+# Commenting out for now - enable after setting up glances
+# - glances:
+#     url: http://PI_TAILSCALE_IP:61208
+#     version: 4
+#     metric: info
+#     label: Raspberry Pi
