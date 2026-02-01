@@ -1,0 +1,52 @@
+admin-base: &admin-base
+  entrypoints: [websecure]
+  tls:
+    certResolver: letsencrypt
+  middlewares:
+    - security-headers@file
+
+http:
+  routers:
+    homepage-admin:
+      <<: *admin-base
+      rule: "Host(`admin.{{ env "DOMAIN" }}`)"
+      service: homepage-admin
+
+    homepage-public:
+      <<: *admin-base
+      rule: "Host(`{{ env "DOMAIN" }}`) || Host(`www.{{ env "DOMAIN" }}`)"
+      service: homepage-public
+
+    wiki:
+      <<: *admin-base
+      rule: "Host(`wiki.{{ env "DOMAIN" }}`)"
+      service: wiki
+      middlewares:
+        - security-headers@file
+        - compression@file
+
+    docs-admin:
+      <<: *admin-base
+      rule: "Host(`docs.{{ env "DOMAIN" }}`)"
+      service: docs-admin
+
+  services:
+    homepage-admin:
+      loadBalancer:
+        servers:
+          - url: "http://homepage-admin:3000"
+
+    homepage-public:
+      loadBalancer:
+        servers:
+          - url: "http://homepage-public:3000"
+
+    wiki:
+      loadBalancer:
+        servers:
+          - url: "http://docs-wiki-nginx:80"
+
+    docs-admin:
+      loadBalancer:
+        servers:
+          - url: "http://docs-admin-nginx:80"

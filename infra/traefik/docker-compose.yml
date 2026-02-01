@@ -1,0 +1,38 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"     
+      - "443:443"   
+      - "8080:8080"
+      - "8082:8082"   # Metrics Endpoint
+    environment:
+      - TZ=${TZ}
+      - CF_API_EMAIL=${CF_API_EMAIL}
+      - CF_DNS_API_TOKEN=${CF_API_KEY}
+      - DOMAIN=${DOMAIN}
+    volumes:
+      # Traefik config files
+      - ./traefik.yml:/traefik.yml:ro
+      - ./dynamic:/dynamic:ro
+      # Certificate storage
+      - ./acme/acme.json:/acme.json
+      # Docker socket (for service discovery)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Logs
+      - ./logs:/var/log/traefik
+    networks:
+      - traefik_public
+      - traefik_admin
+
+networks:
+  traefik_public:
+    name: traefik_public
+    driver: bridge
+  traefik_admin:
+    name: traefik_admin
+    driver: bridge

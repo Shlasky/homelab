@@ -1,0 +1,79 @@
+services:
+  # Gluten - VPN Container
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    environment:
+      - TZ=${TZ}
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=${VPN_TYPE}
+      - OPENVPN_USER=${VPN_USER}
+      - OPENVPN_PASSWORD=${VPN_PASSWORD}
+      # --- Wireguard Variables --- #
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
+      - WIREGUARD_ENDPOINT_IP=${WIREGUARD_ENDPOINT_IP}
+      - WIREGUARD_ENDPOINT_PORT=51820
+      - WIREGUARD_ADRESSES=10.14.0.2/16
+      - WIREGUARD_DNS=${WIREGUARD_DNS}
+      - DOT=off
+      - BLOCK_MALICIOUS=off
+      - FIREWALL_OUTBOUND_SUBNETS=10.0.0.0/32
+      - FIREWALL_VPN_INPUT_PORTS=6881
+      - FIREWALL_INPUT_PORTS=6881
+      - LOG_LEVEL=debug
+    volumes:
+      - ./wireguard.conf:/gluetun/wireguard/wg0.conf:ro
+      - ./gluetun:/gluetun
+    ports:
+      - "8090:8090"
+      - "6881:6881"
+      - "6881:6881/udp"
+    networks:
+      - traefik_admin
+    labels:
+      # Traefik labels for qBittorrent (since it's behind Gluetun)
+      - "traefik.enable=true"
+      
+      # qBittorrent Router
+      - "traefik.http.routers.qbittorrent.rule=Host(`torrent.${DOMAIN}`) || Host(`torrent.${ADMIN_DOMAIN}`)"
+      - "traefik.http.routers.qbittorrent.entrypoints=websecure"
+      - "traefik.http.routers.qbittorrent.tls=true"
+      - "traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.qbittorrent.middlewares=qbit-headers"
+      
+      # Header testubg
+      - "traefik.http.middlewares.qbit-headers.headers.customrequestheaders.X-Frame-Options=SAMEORIGIN"
+      - "traefik.http.middlewares.qbit-headers.headers.customrequestheaders.Referer="
+      - "traefik.http.middlewares.qbit-headers.headers.customrequestheaders.Origin="
+      
+      # qBittorrent Service
+      - "traefik.http.services.qbittorrent.loadbalancer.server.port=8090"
+
+  # Torrent Client - Routes through VPN
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+      - WEBUI_PORT=8090
+      - DISABLE_HOST_HEADER_CHECK=1
+    volumes:
+      - ./qbittorrent/config:/config
+      - /mnt/downloads:/downloads
+    depends_on:
+      - gluetun
+
+networks:
+  traefik_admin:
+    external: true

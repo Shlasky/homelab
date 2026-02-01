@@ -4,32 +4,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a Docker-based self-hosted infrastructure repository managed through Traefik reverse proxy. The architecture follows a modular service-based design where each directory represents a standalone service stack with its own docker-compose configuration.
+This is a Docker-based self-hosted infrastructure repository managed through Traefik reverse proxy. The architecture follows a hierarchical, category-based design where services are grouped into top-level directories (`infra/`, `media/`, `product/`, `game-servers/`), each containing standalone service stacks with their own docker-compose configuration.
 
 ### Architecture
 
-**Core Infrastructure:**
-- **Traefik** (`traefik/`): Reverse proxy with automatic SSL (Let's Encrypt via Cloudflare DNS challenge), metrics endpoint, and centralized routing
+**Core Infrastructure (`infra/`):**
+- **Traefik** (`infra/traefik/`): Reverse proxy with automatic SSL (Let's Encrypt via Cloudflare DNS challenge), metrics endpoint, and centralized routing
   - Two networks: `traefik_public` (internet-facing) and `traefik_admin` (VPN/Tailscale only)
-  - Dynamic configuration via Docker labels and file provider (`dynamic/middlewares.yml`)
+  - Dynamic configuration via Docker labels and file provider (`dynamic/middlewares.yml`, `dynamic/routers/`)
   - Services expose themselves by setting `traefik.enable=true` and defining routers/services via labels
+- **MongoDB** (`infra/db/mongodb/`): Database with mongo-express UI and Prometheus exporter
+- **Docker Registry** (`infra/registry/`): Private registry with token-based auth via cesanta/docker_auth
+- **GitHub Runners** (`infra/github-runners/`): Self-hosted runners for GitHub Actions (org-level)
+- **Monitoring** (`infra/monitoring/`): Grafana, Prometheus, Loki, Tempo, Alertmanager, Promtail, Node-exporter, and cAdvisor
+- **Dockhand** (`infra/dockhand/`): Docker stack management with git integration
 
-**Service Categories:**
-1. **Media Stack** (`jellyfin/`, `arr/`, `torrent/`):
-   - Jellyfin: Media server with dual routing (public via `tv.${DOMAIN}`, admin via `tv.${ADMIN_DOMAIN}`)
-   - Jellyseerr: Request management system
-   - Arr stack: Sonarr (TV), Radarr (movies), Bazarr (subtitles), Prowlarr (indexer manager)
-   - qBittorrent: Torrent client routing through Gluetun VPN container (network_mode: service:gluetun)
+**Media Stack (`media/`):**
+- **Jellyfin** (`media/jellyfin/`): Media server with dual routing (public via `tv.${DOMAIN}`, admin via `tv.${ADMIN_DOMAIN}`), includes Jellyseerr request management
+- **Arr stack** (`media/arr/`): Sonarr (TV), Radarr (movies), Bazarr (subtitles), Prowlarr (indexer manager)
+- **Torrent** (`media/torrent/`): qBittorrent torrent client routing through Gluetun VPN container (network_mode: service:gluetun)
+- **Media Tools** (`media/media-tools/`): FFsubsync and other media utilities
 
-2. **Infrastructure Services**:
-   - MongoDB (`db/mongodb/`): Database with mongo-express UI and Prometheus exporter
-   - Docker Registry (`registry/`): Private registry with token-based auth via cesanta/docker_auth
-   - GitHub Runners (`github-runners/`): Self-hosted runners for GitHub Actions (org-level)
-   - Monitoring (`monitor/`): Node-exporter and cAdvisor for Prometheus metrics
+**Products (`product/`):**
+- **Dashboards** (`product/homepage/`): Admin and public homepage dashboards
+- **Docs** (`product/docs/`): MkDocs-based documentation (public and private sites)
+- **SP** (`product/sp/`): WebDAV-based service
 
-3. **Dashboards** (`homepage/`):
-   - Admin homepage: Full service dashboard with API integrations
-   - Public homepage: Public-facing landing page
+**Game Servers (`game-servers/`):**
+- **Minecraft** (`game-servers/minecraft/`): Minecraft server
+- **Satisfactory** (`game-servers/satisfactory/`): Satisfactory dedicated server
+- **Playit** (`game-servers/playit/`): Playit.gg tunnel for game server connectivity
 
 ### Network Architecture
 
@@ -46,18 +50,23 @@ Services often define dual routes supporting both domains (e.g., `Host(\`service
 
 ### Traefik Configuration
 
-**Static config** (`traefik/traefik.yml`):
+**Static config** (`infra/traefik/traefik.yml`):
 - Entry points: web (80→443 redirect), websecure (443), metrics (8082)
 - Cloudflare DNS challenge for Let's Encrypt certificates
 - Docker provider with `exposedByDefault: false`
 
-**Dynamic config** (`traefik/dynamic/middlewares.yml`):
+**Dynamic config** (`infra/traefik/dynamic/middlewares.yml`):
 - `security-headers@file`: HSTS, CSP, XSS protection
 - `compression@file`: Gzip compression
 - `cloudflare-ips@file`: IP whitelist for Cloudflare
 - `admin-network@file`: Tailscale/local network IP whitelist
 - `rate-limit@file`: 100 req/min with burst of 50
 - `registry-auth-transport@file`: Skip TLS verification for registry auth
+
+**Dynamic routers** (`infra/traefik/dynamic/routers/`):
+- `infra.yaml`: Routes for infrastructure services
+- `media.yaml`: Routes for media services
+- `product.yaml`: Routes for product services
 
 ### Environment Variables
 
@@ -75,7 +84,7 @@ All services use environment variables from `.env` files (not committed, see `.g
 **Start/stop services:**
 ```bash
 # Start a service stack
-cd /srv/<service-name>
+cd /srv/<category>/<service-name>
 docker compose up -d
 
 # View logs
@@ -93,7 +102,7 @@ docker compose up -d --force-recreate
 
 **Manage Traefik (must be running first):**
 ```bash
-cd /srv/traefik
+cd /srv/infra/traefik
 docker compose up -d
 
 # View Traefik logs
@@ -133,7 +142,7 @@ docker push registry.${DOMAIN}/image:tag
 
 **MongoDB operations:**
 ```bash
-cd /srv/db/mongodb
+cd /srv/infra/db/mongodb
 
 # Access MongoDB shell
 docker exec -it mongodb mongosh -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD}
@@ -168,23 +177,23 @@ docker inspect <container-name> | grep -A 20 Networks
 **Logs:**
 ```bash
 # Traefik access logs
-tail -f /srv/traefik/logs/access.log
+tail -f /srv/infra/traefik/logs/access.log
 
 # Service logs
-docker compose -f /srv/<service>/docker-compose.yaml logs -f
+docker compose -f /srv/<category>/<service>/docker-compose.yaml logs -f
 ```
 
 ## Development Patterns
 
 ### Adding a New Service
 
-1. Create directory under `/srv/<service-name>/`
+1. Create directory under `/srv/<category>/<service-name>/` (choose `infra/`, `media/`, `product/`, or `game-servers/`)
 2. Create `docker-compose.yaml` with:
    - Service definition using official/linuxserver images
-   - Volume mounts (config in `/srv/<service>/<data>`)
+   - Volume mounts (config in `/srv/<category>/<service>/<data>`)
    - Network: `traefik_public` or `traefik_admin` (external: true)
    - Traefik labels for routing (see examples in existing services)
-3. Add to `.gitignore`: `<service>/data/`, `<service>/config/`, etc.
+3. Add runtime data patterns to `.gitignore` if needed
 4. Start service: `docker compose up -d`
 
 **Traefik label template:**
@@ -227,20 +236,44 @@ Use `/srv/scripts/template_script.sh` as a base. It provides:
 ## File Structure Conventions
 
 ```
-/srv/<service>/
+/srv/
+  ├── infra/                         # Core infrastructure
+  │   ├── traefik/
+  │   │   ├── docker-compose.yml
+  │   │   ├── traefik.yml            # Static config
+  │   │   ├── dynamic/               # Dynamic config
+  │   │   │   ├── middlewares.yml
+  │   │   │   └── routers/           # Per-category route files
+  │   │   ├── acme/                  # SSL certificates (gitignored)
+  │   │   └── logs/                  # Access logs (gitignored)
+  │   ├── db/mongodb/
+  │   ├── registry/
+  │   ├── github-runners/
+  │   ├── monitoring/                # Grafana, Prometheus, Loki, etc.
+  │   └── dockhand/
+  ├── media/                         # Media services
+  │   ├── jellyfin/
+  │   ├── arr/                       # Sonarr, Radarr, Bazarr, Prowlarr
+  │   ├── torrent/                   # qBittorrent + Gluetun VPN
+  │   └── media-tools/
+  ├── product/                       # User-facing products
+  │   ├── homepage/
+  │   │   ├── admin/                 # Admin dashboard
+  │   │   └── public/                # Public landing page
+  │   ├── docs/                      # MkDocs documentation
+  │   └── sp/
+  ├── game-servers/                  # Game server instances
+  │   ├── minecraft/
+  │   ├── satisfactory/
+  │   └── playit/
+  └── scripts/                       # Shared utility scripts
+
+# Per-service directory layout:
+/srv/<category>/<service>/
   ├── docker-compose.yaml    # Service definition
   ├── .env                   # Environment variables (gitignored)
-  ├── config/                # Application config (gitignored)
-  ├── data/                  # Application data (gitignored)
-  └── cache/                 # Cache files (gitignored)
-
-/srv/traefik/
-  ├── docker-compose.yml
-  ├── traefik.yml           # Static config
-  ├── dynamic/              # Dynamic config (middlewares, routes)
-  │   └── middlewares.yml
-  ├── acme/                 # SSL certificates (gitignored)
-  └── logs/                 # Access logs (gitignored)
+  ├── config/                # Application config (gitignored where applicable)
+  └── data/                  # Application data (gitignored)
 ```
 
 ## Important Notes
@@ -252,4 +285,4 @@ Use `/srv/scripts/template_script.sh` as a base. It provides:
 - Always use `restart: unless-stopped` for production services
 - Security headers and compression are applied via `@file` middleware references
 - Services with `external: true` networks must have networks created first
-- The repository uses shallow git history; recent commits show homepage migration to admin/public split
+- Dockhand manages stack deployments and can sync with this git repo

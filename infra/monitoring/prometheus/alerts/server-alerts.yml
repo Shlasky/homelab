@@ -1,0 +1,165 @@
+groups:
+  - name: server_health
+    interval: 30s
+    rules:
+      # Critical: Instance is down
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute."
+
+      # Critical: Disk space > 90%
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{mountpoint=~"/|/mnt/.*"} / node_filesystem_size_bytes{mountpoint=~"/|/mnt/.*"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space critically low on {{ $labels.instance }}"
+          description: "Disk {{ $labels.mountpoint }} on {{ $labels.instance }} has less than 10% free space ({{ $value | humanize }}% remaining)."
+
+      # Warning: Disk space > 85%
+      - alert: DiskSpaceWarning
+        expr: (node_filesystem_avail_bytes{mountpoint=~"/|/mnt/.*"} / node_filesystem_size_bytes{mountpoint=~"/|/mnt/.*"}) * 100 < 15
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space low on {{ $labels.instance }}"
+          description: "Disk {{ $labels.mountpoint }} on {{ $labels.instance }} has less than 15% free space ({{ $value | humanize }}% remaining)."
+
+      # Critical: Memory usage > 95%
+      - alert: MemoryCritical
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Memory critically high on {{ $labels.instance }}"
+          description: "Memory usage on {{ $labels.instance }} is above 95% ({{ $value | humanize }}%)."
+
+      # Warning: Memory usage > 85%
+      - alert: MemoryWarning
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memory usage high on {{ $labels.instance }}"
+          description: "Memory usage on {{ $labels.instance }} is above 85% ({{ $value | humanize }}%)."
+
+      # Warning: High CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage on {{ $labels.instance }} has been above 80% for 15 minutes ({{ $value | humanize }}%)."
+
+  - name: docker_health
+    interval: 30s
+    rules:
+      # Warning: Container restarted
+      - alert: ContainerRestarted
+        expr: rate(container_last_seen{name!=""}[5m]) > 0 and on(name) container_start_time_seconds > (time() - 300)
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} restarted"
+          description: "Container {{ $labels.name }} on {{ $labels.instance }} has restarted recently."
+
+      # Critical: Container in restart loop
+      - alert: ContainerRestartLoop
+        expr: rate(container_last_seen{name!=""}[15m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container {{ $labels.name }} in restart loop"
+          description: "Container {{ $labels.name }} on {{ $labels.instance }} is restarting frequently ({{ $value | humanize }} restarts/sec)."
+
+      # Warning: High container memory usage
+      - alert: ContainerHighMemory
+        expr: (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} high memory"
+          description: "Container {{ $labels.name }} is using {{ $value | humanize }}% of its memory limit."
+
+  - name: traefik_health
+    interval: 30s
+    rules:
+      # Critical: High rate of 5xx errors
+      - alert: TraefikHighErrorRate
+        expr: rate(traefik_service_requests_total{code=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High 5xx error rate on {{ $labels.service }}"
+          description: "Service {{ $labels.service }} is returning 5xx errors at {{ $value | humanize }} req/s."
+
+      # Warning: Traefik service backend down
+      - alert: TraefikBackendDown
+        expr: traefik_service_server_up == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Traefik backend down"
+          description: "Backend {{ $labels.server }} for service {{ $labels.service }} is down."
+
+  - name: mongodb_health
+    interval: 30s
+    rules:
+      # Critical: MongoDB is down
+      - alert: MongoDBDown
+        expr: mongodb_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB instance {{ $labels.instance }} is down."
+
+      # Warning: MongoDB high connections
+      - alert: MongoDBHighConnections
+        expr: (mongodb_connections{state="current"} / mongodb_connections{state="available"}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB high connection usage"
+          description: "MongoDB is using {{ $value | humanize }}% of available connections."
+
+  - name: prometheus_health
+    interval: 30s
+    rules:
+      # Warning: Prometheus scrape failures
+      - alert: PrometheusScrapeFailure
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus scrape failure"
+          description: "Prometheus failed to scrape {{ $labels.job }} on {{ $labels.instance }} for 5 minutes."
+
+      # Warning: Prometheus storage almost full
+      - alert: PrometheusStorageAlmostFull
+        expr: (prometheus_tsdb_storage_blocks_bytes / prometheus_tsdb_storage_blocks_bytes) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus storage almost full"
+          description: "Prometheus storage is {{ $value | humanize }}% full."

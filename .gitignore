@@ -1,3 +1,7 @@
+# Claude
+.CLAUDE.md
+*/.CLAUDE.md
+
 # Obsidian workspace files (personal settings)
 .obsidian/workspace*
 .obsidian/cache
@@ -25,7 +29,7 @@ credentials/
 !.env.*.example
 
 # Docker volumes and runtime data
-*/data/
+**/data/
 */volumes/
 */cache/
 *_data/
@@ -52,7 +56,6 @@ temp/
 # Personal notes you don't want to share
 PERSONAL.md
 PASSWORDS.md
-private/
 
 # Large media files 
 *.iso
@@ -66,30 +69,50 @@ private/
 .idea/
 *.code-workspace
 
-# Traefik
-traefik/dynamic/
-traefik/acme/
+# Traefik runtime
+**/acme/
 
-# Jellyfin
-jellyfin/config/
-jellyfin/**/config/
-jellyfin/cache/
+# Jellyfin runtime
+**/jellyfin/config/
+**/jellyfin/cache/
+**/jellyfin/cache-backup/
+**/jellyseerr/
 
-# Torrent
-torrent/gluetun
-torrent/qbittorrent
-!torrent/qbittorrent/config/qBittorrent/qBittorrent*.conf
+# Torrent/VPN runtime
+**/torrent/gluetun/
+**/torrent/qbittorrent/
 wireguard.conf
 
-# Arr Stack
-bazarr/
-prowlarr/
-sonarr/
-radarr/
+# Arr stack runtime configs
+**/arr/bazarr/
+**/arr/prowlarr/
+**/arr/sonarr/
+**/arr/radarr/
 
-# DB
-**/*/data/
+# Registry secrets and data (config.yml is OK, keys and blobs are not)
+**/registry/auth/*.key
+**/registry/auth/*.pem
+**/registry/data/
 
-# Registry
-registry/auth/*
+# Game servers runtime
+**/minecraft/data/
+**/minecraft/modpacks/
+**/satisfactory/config/
+
+# Monitoring runtime data
+**/grafana/data/
+**/prometheus/data/
+**/loki/data/
+**/tempo/data/
+**/alertmanager/data/
+**/promtail/positions/
+
+# Homepage logs
+**/homepage/**/config/logs/
+
+# Dockhand DB
+**/dockhand/data/
+
+# MongoDB runtime data
+**/mongodb/data/
 

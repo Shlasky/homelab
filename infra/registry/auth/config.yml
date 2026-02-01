@@ -1,0 +1,41 @@
+server:
+  addr: ":5001"
+  certificate: "/certs/server.pem"
+  key: "/certs/server.key"
+
+token:
+  issuer: "Shdocker Hub Auth"
+  expiration: 900  # 15 minutes
+  certificate: "/certs/server.pem"
+  key: "/certs/server.key"
+
+# User accounts
+users:
+
+  "github-actions":
+    password: 
+
+  "admin":
+    password: $2y$05$7iTfTfsf7LtUejhR6Dx2s.oqFvKEKBPqHXype8gKUWeVX.XBSYHTa
+
+# Access control lists
+acl:
+  # Admin users (full access to everything)
+  - match: {account: "/.+/"}
+    actions: ["*"]
+    comment: "Admin - full access"
+
+  # GitHub Actions (can push/pull anything)
+  - match: {account: "github-actions"}
+    actions: ["*"]
+    comment: "CI/CD - full access"
+
+  # Read-only users (example for future)
+  # - match: {account: "readonly-user"}
+  #   actions: ["pull"]
+  #   comment: "Read-only access"
+
+  # Per-project access (example for future)
+  # - match: {account: "dev1", name: "myproject/*"}
+  #   actions: ["*"]
+  #   comment: "Dev1 - access to myproject only"

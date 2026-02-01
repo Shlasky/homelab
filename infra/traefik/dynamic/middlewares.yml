@@ -1,0 +1,73 @@
+http:
+  middlewares:
+    # Security Headers - Apply to all public services
+    security-headers:
+      headers:
+        customResponseHeaders:
+          X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex"
+          server: ""  # Hide server version
+          X-Forwarded-Proto: "https"
+        sslProxyHeaders:
+          X-Forwarded-Proto: "https"
+        stsSeconds: 63072000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "same-origin"
+        permissionsPolicy: "camera=(), microphone=(), geolocation=()"
+    
+    # Cloudflare IP Whitelist - Allow traffic only to Cloudflare IPs
+    cloudflare-ips:
+      ipWhiteList:
+        sourceRange:
+          # Update from https://www.cloudflare.com/ips-v4
+          - "173.245.48.0/20"
+          - "103.21.244.0/22"
+          - "103.22.200.0/22"
+          - "103.31.4.0/22"
+          - "141.101.64.0/18"
+          - "108.162.192.0/18"
+          - "190.93.240.0/20"
+          - "188.114.96.0/20"
+          - "197.234.240.0/22"
+          - "198.41.128.0/17"
+          - "162.158.0.0/15"
+          - "104.16.0.0/13"
+          - "104.24.0.0/14"
+          - "172.64.0.0/13"
+          - "131.0.72.0/22"
+    
+    admin-network:
+      ipWhiteList:
+        sourceRange:
+          # Tailscale IP range (100.64.0.0/10)
+          - "100.64.0.0/10"
+          # local network 
+          - "10.0.0.0/24"
+          # Localhost
+          - "127.0.0.1/32"
+
+    # Rate Limiting - Prevent abuse
+    rate-limit:
+      rateLimit:
+        average: 100  # 100 requests
+        period: 1m    # per minute
+        burst: 50     # allow bursts of 50
+    
+    # Compression
+    compression:
+      compress: {}
+    
+    # Add real IP from Cloudflare
+    real-ip:
+      headers:
+        customRequestHeaders:
+          X-Real-IP: ""
+          X-Forwarded-For: ""
+
+  serversTransports:
+    registry-auth-transport:
+      insecureSkipVerify: true
+        

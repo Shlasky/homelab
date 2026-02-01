@@ -1,0 +1,101 @@
+services:
+  # MKVToolNix - GUI for MKV file editing and metadata management
+  mkvtoolnix:
+    image: jlesage/mkvtoolnix:latest
+    container_name: mkvtoolnix
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - USER_ID=1000
+      - GROUP_ID=1000
+      - UMASK=002
+    volumes:
+      - ./mkvtoolnix/config:/config
+      - /mnt/media/jellyfin/media:/storage:rw
+      - /mnt/downloads:/downloads:rw
+    networks:
+      - traefik_admin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mkvtoolnix.rule=Host(`mkv.${ADMIN_DOMAIN}`)"
+      - "traefik.http.routers.mkvtoolnix.entrypoints=websecure"
+      - "traefik.http.routers.mkvtoolnix.tls=true"
+      - "traefik.http.routers.mkvtoolnix.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.mkvtoolnix.middlewares=security-headers@file"
+      - "traefik.http.services.mkvtoolnix.loadbalancer.server.port=5800"
+
+  # FFsubsync - Automatic subtitle synchronization
+  ffsubsync:
+    image: novinem/jellyfin-subsyncer
+    container_name: ffsubsync
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - /mnt/media/jellyfin/media:/media:rw
+      - /mnt/downloads:/downloads:rw
+      - /srv/media-tools/ffsubsync/logs:/logs
+    entrypoint: tail -f /dev/null  # Keep container running for exec commands
+
+  # YT-DLP Container - YouTube downloader with Premium support
+  yt-dlp:
+    image: tnk4on/yt-dlp:latest
+    container_name: yt-dlp
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /srv/media-tools/yt-dlp/config:/config
+      - /srv/media-tools/yt-dlp/cookies:/cookies:ro
+      - /mnt/downloads/yt-dlp:/downloads
+      - /srv/media-tools/scripts:/scripts:ro
+    command: tail -f /dev/null  # Keep running for cron/automation
+    networks:
+      - traefik_admin
+
+  # Telegram Downloader - Automated Telegram media download
+  # telegram-dl:
+  #   build:
+  #     context: ./telegram-dl
+  #     dockerfile: Dockerfile
+  #   container_name: telegram-dl
+  #   restart: unless-stopped
+  #   environment:
+  #     - TZ=${TZ}
+  #     - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+  #     - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+  #     - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+  #     - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+  #     - DOWNLOADS_FOLDER=/downloads
+  #   volumes:
+  #     - /mnt/downloads/telegram:/downloads
+  #     - /srv/media-tools/telegram-dl/config:/config
+  #     - /srv/media-tools/telegram-dl/sessions:/sessions
+  #   networks:
+  #     - traefik_admin
+
+  # Media Quality Controller - Automation orchestrator
+  media-controller:
+    image: python:3.11-slim
+    container_name: media-controller
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /srv/media-tools/scripts:/scripts
+      - /mnt/media/jellyfin/media:/media:rw
+      - /mnt/downloads:/downloads:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    working_dir: /scripts
+    command: python3 media_watchdog.py
+    depends_on:
+      - ffsubsync
+      - mkvtoolnix
+
+networks:
+  traefik_admin:
+    external: true

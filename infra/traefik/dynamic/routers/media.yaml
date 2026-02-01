@@ -1,0 +1,72 @@
+admin-base: &admin-base
+  entrypoints: [websecure]
+  tls:
+    certResolver: letsencrypt
+  middlewares:
+    - security-headers@file
+
+http:
+  routers:
+    jellyfin:
+      <<: *admin-base
+      rule: "Host(`tv.{{ env "DOMAIN" }}`) || Host(`jellyfin.{{ env "DOMAIN" }}`)"
+      service: jellyfin
+      middlewares:
+        - security-headers@file
+        - compression@file
+
+    jellyseerr:
+      <<: *admin-base
+      rule: "Host(`request.{{ env "DOMAIN" }}`)"
+      service: jellyseerr
+
+    radarr:
+      <<: *admin-base
+      rule: "Host(`radarr.{{ env "DOMAIN" }}`)"
+      service: radarr
+
+    sonarr:
+      <<: *admin-base
+      rule: "Host(`sonarr.{{ env "DOMAIN" }}`)"
+      service: sonarr
+
+    bazarr:
+      <<: *admin-base
+      rule: "Host(`bazarr.{{ env "DOMAIN" }}`)"
+      service: bazarr
+
+    prowlarr:
+      <<: *admin-base
+      rule: "Host(`prowlarr.{{ env "DOMAIN" }}`)"
+      service: prowlarr
+
+  services:
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "http://jellyfin:8096"
+
+    jellyseerr:
+      loadBalancer:
+        servers:
+          - url: "http://jellyseerr:5055"
+
+    radarr:
+      loadBalancer:
+        servers:
+          - url: "http://radarr:7878"
+
+    sonarr:
+      loadBalancer:
+        servers:
+          - url: "http://sonarr:8989"
+
+    bazarr:
+      loadBalancer:
+        servers:
+          - url: "http://bazarr:6767"
+
+    prowlarr:
+      loadBalancer:
+        servers:
+          - url: "http://prowlarr:9696"

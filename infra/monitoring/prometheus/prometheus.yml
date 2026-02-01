@@ -1,0 +1,87 @@
+global:
+  scrape_interval: 15s  # Collect metrics every 15 seconds
+  evaluation_interval: 15s  # Evaluate rules every 15 seconds
+  scrape_timeout: 10s
+  external_labels:
+    cluster: 'homelab'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Load alert rules
+rule_files:
+  - '/etc/prometheus/alerts/*.yml'
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          instance: 'prometheus'
+          server: 'mothership'
+
+  # Raspberry Pi - Node Exporter (System Metrics)
+  - job_name: 'node-exporter-mothership'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          instance: 'mothership'
+          server: 'mothership'
+          role: 'monitoring-server'
+
+  # Raspberry Pi - cAdvisor (Docker Metrics)
+  - job_name: 'cadvisor-mothership'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          instance: 'mothership'
+          server: 'mothership'
+          role: 'monitoring-server'
+
+  # Mothership - Node Exporter (System Metrics)
+  - job_name: 'node-exporter-pi'
+    static_configs:
+      - targets: ['10.0.0.49:9100']  
+        labels:
+          instance: 'pi'
+          server: 'pi'
+          role: 'primary-server'
+
+  # Mothership - cAdvisor (Docker Metrics)
+  - job_name: 'cadvisor-pi'
+    static_configs:
+      - targets: ['10.0.0.49:8081'] 
+        labels:
+          instance: 'pi'
+          server: 'pi'
+          role: 'primary-server'
+
+  # Traefik Metrics - Mothership
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8082']
+        labels:
+          instance: 'traefik'
+          server: 'mothership'
+
+  # Traefik Metrics - Pi
+  - job_name: 'traefik-pi'
+    static_configs:
+      - targets: ['10.0.0.49:8082']
+        labels:
+          instance: 'traefik'
+          server: 'raspberry-pi'
+
+  # MongoDB Metrics
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongo-exporter.monitoring:9216']
+        labels:
+          instance: 'mongodb'
+          server: 'mothership'

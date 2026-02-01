@@ -1,0 +1,19 @@
+media
+  arr
+  jellyfin
+  jellyseerr
+  media-tools(?)
+  torrent
+infra
+  traefik
+  github-runners
+  registry
+  db
+    mongo
+    postgres
+game-servers
+  minecraft
+product
+  sp
+  homepage
+  docs

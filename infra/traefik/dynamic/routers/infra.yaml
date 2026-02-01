@@ -1,0 +1,93 @@
+admin-base: &admin-base
+  entrypoints: [websecure]
+  tls:
+    certResolver: letsencrypt
+  middlewares:
+    - security-headers@file
+
+http:
+  routers:
+    traefik-dashboard:
+      <<: *admin-base
+      rule: "Host(`proxy.{{ env "DOMAIN" }}`) || Host(`traefik.{{ env "DOMAIN" }}`)"
+      service: api@internal
+      middlewares:
+        - security-headers@file
+        - dashboard-auth@file
+
+    mongo-express:
+      <<: *admin-base
+      rule: "Host(`mongo.{{ env "DOMAIN" }}`)"
+      service: mongo-express
+
+    grafana:
+      <<: *admin-base
+      rule: "Host(`monitor.{{ env "DOMAIN" }}`)"
+      service: grafana
+
+    prometheus:
+      <<: *admin-base
+      rule: "Host(`prometheus.{{ env "DOMAIN" }}`)"
+      service: prometheus
+
+    loki:
+      <<: *admin-base
+      rule: "Host(`loki.{{ env "DOMAIN" }}`)"
+      service: loki
+
+    tempo:
+      <<: *admin-base
+      rule: "Host(`tempo.{{ env "DOMAIN" }}`)"
+      service: tempo
+
+    alertmanager:
+      <<: *admin-base
+      rule: "Host(`alerts.{{ env "DOMAIN" }}`)"
+      service: alertmanager
+
+    dockhand:
+      <<: *admin-base
+      rule: "Host(`dockhand.{{ env "DOMAIN" }}`)"
+      service: dockhand
+
+  services:
+    mongo-express:
+      loadBalancer:
+        servers:
+          - url: "https://mongo-express:8081"
+
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+
+    prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://prometheus:9090"
+
+    loki:
+      loadBalancer:
+        servers:
+          - url: "http://loki:3100"
+
+    tempo:
+      loadBalancer:
+        servers:
+          - url: "http://tempo:3200"
+
+    alertmanager:
+      loadBalancer:
+        servers:
+          - url: "http://alertmanager:9093"
+
+    dockhand:
+      loadBalancer:
+        servers:
+          - url: "http://dockhand:3000"
+
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        users:
+          - "admin:$2y$05$3v2ZU.If39AkT1zsUTZThe7SLMlRR20rgk.4QVpe17VIoVJqUNcQG"

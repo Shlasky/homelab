@@ -1,0 +1,20 @@
+services:
+  homepage-public:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage-public
+    volumes:
+      - ./config:/app/config 
+    environment:
+      PUID: ${PUID}
+      GUID: ${GUID}
+      TZ: ${TZ}
+
+      HOMEPAGE_ALLOWED_HOSTS: www.${DOMAIN},${DOMAIN}
+      HOMEPAGE_VAR_JELLYFIN_API_KEY: ${HOMEPAGE_VAR_JELLYFIN_API_KEY}
+      HOMEPAGE_VAR_JELLYSEERR_API_KEY: ${HOMEPAGE_VAR_JELLYSEERR_API_KEY}
+    networks:
+      - traefik_public
+
+networks:
+  traefik_public:
+    external: true

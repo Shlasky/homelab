@@ -1,0 +1,40 @@
+services:
+  # Public Documentation (wiki.ashlasky.com)
+  wiki-nginx:
+    image: nginx:alpine
+    container_name: docs-wiki-nginx
+    restart: unless-stopped
+    volumes:
+      - ./site-public:/usr/share/nginx/html:ro
+    networks:
+      - traefik_public
+
+  # Private/Admin Documentation (docs.ashlasky.com)
+  docs-nginx:
+    image: nginx:alpine
+    container_name: docs-admin-nginx
+    restart: unless-stopped
+    volumes:
+      - ./site-private:/usr/share/nginx/html:ro
+    networks:
+      - traefik_admin
+
+  # Development Server (optional - not started by default)
+  #  mkdocs-dev:
+  #    image: squidfunk/mkdocs-material:latest
+  #    container_name: docs-dev-server
+  #    profiles:
+  #      - dev  # Only runs when explicitly started
+  #    volumes:
+  #      - ./:/docs
+  #    ports:
+  #      - "8000:8000"
+  #    command: serve --dev-addr=0.0.0.0:8000 --config-file=/docs/mkdocs-public.yml
+  #    networks:
+  #      - traefik_admin
+
+networks:
+  traefik_public:
+    external: true
+  traefik_admin:
+    external: true

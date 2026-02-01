@@ -1,0 +1,92 @@
+global:
+  resolve_timeout: 5m
+
+# Templates for alert messages (optional, can add later)
+# templates:
+#   - '/etc/alertmanager/templates/*.tmpl'
+
+route:
+  # Default receiver for all alerts
+  receiver: 'default'
+
+  # Group alerts by these labels
+  group_by: ['alertname', 'cluster', 'service']
+
+  # Wait before sending notification for a group
+  group_wait: 10s
+
+  # Wait before sending notification about new alerts for the same group
+  group_interval: 10s
+
+  # Wait before sending notification again if alert persists
+  repeat_interval: 12h
+
+  # Child routes for specific alert types
+  routes:
+    # Critical alerts - send immediately
+    - match:
+        severity: critical
+      receiver: 'critical'
+      group_wait: 0s
+      repeat_interval: 5m
+
+    # Warning alerts - can wait a bit
+    - match:
+        severity: warning
+      receiver: 'default'
+      group_wait: 30s
+      repeat_interval: 1h
+
+    # Info alerts - low priority
+    - match:
+        severity: info
+      receiver: 'default'
+      repeat_interval: 24h
+
+receivers:
+  # Default receiver - configure your notification method here
+  - name: 'default'
+    # Uncomment and configure one or more:
+
+    # Discord webhook
+    # discord_configs:
+    #   - webhook_url: '${DISCORD_WEBHOOK_URL}'
+    #     title: '{{ .GroupLabels.alertname }}'
+    #     message: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+    # Slack webhook
+    # slack_configs:
+    #   - api_url: '${SLACK_WEBHOOK_URL}'
+    #     channel: '#alerts'
+    #     title: '{{ .GroupLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+    # Telegram
+    # telegram_configs:
+    #   - bot_token: '${TELEGRAM_BOT_TOKEN}'
+    #     chat_id: ${TELEGRAM_CHAT_ID}
+    #     message: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+    # Email
+    # email_configs:
+    #   - to: 'your-email@example.com'
+    #     from: 'alertmanager@homelab.local'
+    #     smarthost: 'smtp.gmail.com:587'
+    #     auth_username: 'your-email@gmail.com'
+    #     auth_password: '${EMAIL_APP_PASSWORD}'
+    #     headers:
+    #       Subject: 'Homelab Alert: {{ .GroupLabels.alertname }}'
+
+  # Critical alerts receiver (same as default for now, can differentiate later)
+  - name: 'critical'
+    # Same configuration as 'default' or more urgent notification method
+
+# Inhibition rules - prevent sending redundant alerts
+inhibit_rules:
+  # If instance is down, don't alert on high CPU/memory for that instance
+  - source_match:
+      severity: 'critical'
+      alertname: 'InstanceDown'
+    target_match:
+      severity: 'warning'
+    equal: ['instance']

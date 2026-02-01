@@ -1,0 +1,38 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    user: 1000:1000
+    environment:
+      - TZ=${TZ}
+      - PUID=1000
+      - GUID=1000
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - /mnt/media/jellyfin/media:/media:ro  # Read-only for safety
+    networks:
+      - traefik_public
+      - traefik_admin
+    devices:
+      - /dev/dri:/dev/dri  # For Intel GPU transcoding
+
+  jellyseerr:
+    image: ghcr.io/fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=${TZ}
+    volumes:
+      - ./jellyseerr/config:/app/config
+    networks:
+      - traefik_public
+      - traefik_admin
+
+networks:
+  traefik_public:
+    external: true
+  traefik_admin:
+    external: true
