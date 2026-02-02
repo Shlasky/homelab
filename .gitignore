@@ -116,3 +116,7 @@ wireguard.conf
 # MongoDB runtime data
 **/mongodb/data/
 
+# PostgreSQL runtime data
+**/postgres/data/
+**/postgres/pgadmin-data/
+

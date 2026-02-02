@@ -50,6 +50,11 @@ http:
       rule: "Host(`dockhand.{{ env "DOMAIN" }}`)"
       service: dockhand
 
+    pgadmin:
+      <<: *admin-base
+      rule: "Host(`pgadmin.{{ env "DOMAIN" }}`)"
+      service: pgadmin
+
   services:
     mongo-express:
       loadBalancer:
@@ -85,6 +90,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://dockhand:3000"
+
+    pgadmin:
+      loadBalancer:
+        servers:
+          - url: "http://pgadmin:5050"
 
   middlewares:
     dashboard-auth:
