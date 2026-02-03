@@ -13,11 +13,12 @@ This is a Docker-based self-hosted infrastructure repository managed through Tra
   - Two networks: `traefik_public` (internet-facing) and `traefik_admin` (VPN/Tailscale only)
   - Dynamic configuration via Docker labels and file provider (`dynamic/middlewares.yml`, `dynamic/routers/`)
   - Services expose themselves by setting `traefik.enable=true` and defining routers/services via labels
-- **MongoDB** (`infra/db/mongodb/`): Database with mongo-express UI and Prometheus exporter
+- **MongoDB** (`infra/db/mongodb/`): Database with mongo-express UI and Prometheus exporter, dedicated `mongodb` network
+- **PostgreSQL** (`infra/db/postgres/`): PostgreSQL 16 database with pgAdmin UI, dedicated `postgres` network. Used by Dockhand.
 - **Docker Registry** (`infra/registry/`): Private registry with token-based auth via cesanta/docker_auth
 - **GitHub Runners** (`infra/github-runners/`): Self-hosted runners for GitHub Actions (org-level)
 - **Monitoring** (`infra/monitoring/`): Grafana, Prometheus, Loki, Tempo, Alertmanager, Promtail, Node-exporter, and cAdvisor
-- **Dockhand** (`infra/dockhand/`): Docker stack management with git integration
+- **Dockhand** (`infra/dockhand/`): Docker stack management with PostgreSQL backend, adopts local stacks via `/srv` mount
 
 **Media Stack (`media/`):**
 - **Jellyfin** (`media/jellyfin/`): Media server with dual routing (public via `tv.${DOMAIN}`, admin via `tv.${ADMIN_DOMAIN}`), includes Jellyseerr request management
@@ -46,7 +47,7 @@ Services often define dual routes supporting both domains (e.g., `Host(\`service
 **Network Segmentation:**
 - `traefik_public`: Internet-facing services (Jellyfin public, Registry, Jellyseerr)
 - `traefik_admin`: Admin services (arr stack, dashboards, monitoring UIs)
-- Service-specific networks: `mongodb`, `registry` (internal communication)
+- Service-specific networks: `mongodb`, `postgres`, `registry` (internal communication)
 
 ### Traefik Configuration
 
@@ -151,6 +152,19 @@ docker exec -it mongodb mongosh -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD}
 docker compose logs -f mongodb
 ```
 
+**PostgreSQL operations:**
+```bash
+cd /srv/infra/db/postgres
+
+# Access PostgreSQL shell
+docker exec -it postgres psql -U ${POSTGRES_USER}
+
+# Create database for a new service
+docker exec postgres psql -U postgres -c "CREATE DATABASE mydb;"
+docker exec postgres psql -U postgres -c "CREATE USER myuser WITH PASSWORD 'mypass'; GRANT ALL PRIVILEGES ON DATABASE mydb TO myuser;"
+docker exec postgres psql -U postgres -d mydb -c "GRANT ALL ON SCHEMA public TO myuser; ALTER DATABASE mydb OWNER TO myuser;"
+```
+
 **View all running services:**
 ```bash
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
@@ -246,7 +260,9 @@ Use `/srv/scripts/template_script.sh` as a base. It provides:
   │   │   │   └── routers/           # Per-category route files
   │   │   ├── acme/                  # SSL certificates (gitignored)
   │   │   └── logs/                  # Access logs (gitignored)
-  │   ├── db/mongodb/
+  │   ├── db/
+  │   │   ├── mongodb/
+  │   │   └── postgres/            # PostgreSQL + pgAdmin
   │   ├── registry/
   │   ├── github-runners/
   │   ├── monitoring/                # Grafana, Prometheus, Loki, etc.
