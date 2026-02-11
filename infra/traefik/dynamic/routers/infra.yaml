@@ -8,7 +8,7 @@ admin-base: &admin-base
 http:
   routers:
     traefik-dashboard:
-      <<: *admin-base
+
       rule: "Host(`proxy.{{ env "DOMAIN" }}`) || Host(`traefik.{{ env "DOMAIN" }}`)"
       service: api@internal
       middlewares:
@@ -55,6 +55,11 @@ http:
       rule: "Host(`pgadmin.{{ env "DOMAIN" }}`)"
       service: pgadmin
 
+    n8n:
+      <<: *admin-base
+      rule: "Host(`n8n.{{ env "DOMAIN" }}`)"
+      service: n8n
+
   services:
     mongo-express:
       loadBalancer:
@@ -95,6 +100,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://pgadmin:5050"
+
+    n8n:
+      loadBalancer:
+        servers:
+          - url: "http://n8n:5678"
 
   middlewares:
     dashboard-auth:

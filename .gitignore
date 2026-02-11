@@ -120,3 +120,6 @@ wireguard.conf
 **/postgres/data/
 **/postgres/pgadmin-data/
 
+# n8n runtime data
+**/n8n/data/
+
