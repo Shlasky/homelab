@@ -30,6 +30,11 @@ http:
       rule: "Host(`docs.{{ env "DOMAIN" }}`)"
       service: docs-admin
 
+    firefly:
+      <<: *admin-base
+      rule: "Host(`firefly.{{ env "DOMAIN" }}`)"
+      service: firefly
+
   services:
     homepage-admin:
       loadBalancer:
@@ -50,3 +55,8 @@ http:
       loadBalancer:
         servers:
           - url: "http://docs-admin-nginx:80"
+
+    firefly:
+      loadBalancer:
+        servers:
+          - url: "http://firefly-core:8080"

@@ -4,15 +4,9 @@ services:
     volumes:
     # - ./modpacks:/modpacks:ro
     - ./data:/data
-    environment:
-      TZ: "Asia/Jerusalem"
-      EULA: "true"
-      TYPE: "VANILLA"
-      MOTD: "Welcome to Shminecraft | Hosted on the Shloud"
-      DIFFICULTY: "normal"
-      SNOOPER_ENABLED: false
-      SERVER_NAME: "Shminecraft"
+    env_file:
+      - ../../.env.base
+      - .env
     ports:
       - "25565:25565"
     restart: always
-

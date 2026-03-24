@@ -9,12 +9,9 @@ services:
       - '8888:8888/tcp'
     volumes:
       - './config:/config'
-    environment:
-      - MAXPLAYERS=6
-      - PGID=1000
-      - PUID=1000
-      - STEAMBETA=false
-      - MULTIHOME=0.0.0.0
+    env_file:
+      - ../../.env.base
+      - .env
     restart: unless-stopped
     deploy:
       resources:

@@ -4,10 +4,9 @@ services:
     container_name: jellyfin
     restart: unless-stopped
     user: 1000:1000
-    environment:
-      - TZ=${TZ}
-      - PUID=1000
-      - GUID=1000
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./config:/config
       - ./cache:/cache
@@ -22,9 +21,9 @@ services:
     image: ghcr.io/fallenbagel/jellyseerr:latest
     container_name: jellyseerr
     restart: unless-stopped
-    environment:
-      - LOG_LEVEL=debug
-      - TZ=${TZ}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./jellyseerr/config:/app/config
     networks:

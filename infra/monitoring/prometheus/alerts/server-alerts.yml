@@ -67,7 +67,7 @@ groups:
     rules:
       # Warning: Container restarted
       - alert: ContainerRestarted
-        expr: rate(container_last_seen{name!=""}[5m]) > 0 and on(name) container_start_time_seconds > (time() - 300)
+        expr: increase(container_restart_count{name!=""}[5m]) > 0
         for: 1m
         labels:
           severity: warning
@@ -77,13 +77,13 @@ groups:
 
       # Critical: Container in restart loop
       - alert: ContainerRestartLoop
-        expr: rate(container_last_seen{name!=""}[15m]) > 0.1
+        expr: rate(container_restart_count{name!=""}[15m]) * 60 > 0.5
         for: 5m
         labels:
           severity: critical
         annotations:
           summary: "Container {{ $labels.name }} in restart loop"
-          description: "Container {{ $labels.name }} on {{ $labels.instance }} is restarting frequently ({{ $value | humanize }} restarts/sec)."
+          description: "Container {{ $labels.name }} on {{ $labels.instance }} is restarting frequently ({{ $value | humanize }} restarts/min)."
 
       # Warning: High container memory usage
       - alert: ContainerHighMemory
@@ -144,22 +144,12 @@ groups:
   - name: prometheus_health
     interval: 30s
     rules:
-      # Warning: Prometheus scrape failures
-      - alert: PrometheusScrapeFailure
-        expr: up == 0
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Prometheus scrape failure"
-          description: "Prometheus failed to scrape {{ $labels.job }} on {{ $labels.instance }} for 5 minutes."
-
       # Warning: Prometheus storage almost full
       - alert: PrometheusStorageAlmostFull
-        expr: (prometheus_tsdb_storage_blocks_bytes / prometheus_tsdb_storage_blocks_bytes) * 100 > 85
+        expr: (1 - node_filesystem_avail_bytes{mountpoint="/",job="node-exporter-mothership"} / node_filesystem_size_bytes{mountpoint="/",job="node-exporter-mothership"}) * 100 > 85
         for: 10m
         labels:
           severity: warning
         annotations:
           summary: "Prometheus storage almost full"
-          description: "Prometheus storage is {{ $value | humanize }}% full."
+          description: "Prometheus data directory disk is {{ $value | humanize }}% full."

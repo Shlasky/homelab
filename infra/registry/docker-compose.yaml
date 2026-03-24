@@ -3,8 +3,9 @@ services:
     image: cesanta/docker_auth:1
     container_name: registry-auth
     restart: unless-stopped
-    environment:
-      - TZ=${TZ}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./auth/config.yml:/config/auth_config.yml:ro
       - ./auth/server.key:/certs/server.key:ro
@@ -16,7 +17,7 @@ services:
       # Traefik default
       - "traefik.enable=true"
       - "traefik.docker.network=traefik_public"
-      
+
       # Auth endpoint route
       - "traefik.http.routers.registry-auth.rule=Host(`registry.${DOMAIN}`) && PathPrefix(`/auth`)"
       - "traefik.http.routers.registry-auth.entrypoints=websecure"
@@ -24,34 +25,24 @@ services:
       - "traefik.http.routers.registry-auth.tls.certresolver=letsencrypt"
       - "traefik.http.routers.registry-auth.middlewares=security-headers@file"
       - "traefik.http.routers.registry-auth.priority=100"
-      
+
       # Service configuration - HTTPS scheme and skip cert verify
       - "traefik.http.routers.registry-auth.service=registry-auth-svc"
       - "traefik.http.services.registry-auth-svc.loadbalancer.server.port=5001"
       - "traefik.http.services.registry-auth-svc.loadbalancer.server.scheme=https"
       - "traefik.http.services.registry-auth-svc.loadbalancer.serversTransport=registry-auth-transport@file"
-      
+
       # Middleware to strip /auth prefix
-      - "traefik.http.middlewares.registry-auth-strip.stripprefix.prefixes=/auth" 
+      - "traefik.http.middlewares.registry-auth-strip.stripprefix.prefixes=/auth"
       - "traefik.http.middlewares.registry-auth-strip.stripprefix.forceSlash=false"
 
   registry:
     image: registry:2
     container_name: registry
     restart: unless-stopped
-    environment:
-      # Registry
-      - TZ=${TZ}
-      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
-      - REGISTRY_HTTP_ADDR=0.0.0.0:5000
-      - REGISTRY_HTTP_HOST=https://registry.${DOMAIN}
-      - REGISTRY_LOG_LEVEL=info
-      # Auth
-      - REGISTRY_AUTH=token
-      - REGISTRY_AUTH_TOKEN_REALM=https://registry.${DOMAIN}/auth
-      - REGISTRY_AUTH_TOKEN_SERVICE="Shdocker Hub"
-      - REGISTRY_AUTH_TOKEN_ISSUER="Shdocker Hub Auth"
-      - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/server.pem
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./data:/var/lib/registry
       - ./auth/server.pem:/certs/server.pem:ro
@@ -70,7 +61,7 @@ services:
       - "traefik.http.routers.registry.tls=true"
       - "traefik.http.routers.registry.tls.certresolver=letsencrypt"
       - "traefik.http.routers.registry.middlewares=security-headers@file"
-      
+
       # Service configuration
       - "traefik.http.routers.registry.service=registry-svc"
       - "traefik.http.services.registry-svc.loadbalancer.server.port=5000"

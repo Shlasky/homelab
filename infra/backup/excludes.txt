@@ -1,0 +1,58 @@
+# Restic exclude patterns for mothership backup
+# Lines starting with # are comments
+# Paths are absolute; directories are excluded recursively
+
+# Traefik runtime
+/srv/infra/traefik/logs
+
+# Monitoring time-series data (large, reproducible)
+/srv/infra/monitoring/prometheus/data
+/srv/infra/monitoring/loki/data
+/srv/infra/monitoring/tempo/data
+/srv/infra/monitoring/alertmanager/data
+/srv/infra/monitoring/promtail/positions
+
+# Raw database files — logical dumps are taken instead
+/srv/infra/db/postgres/data
+/srv/infra/db/postgres/pgadmin-data
+/srv/infra/db/mongodb/data
+
+# Arr stack — ephemeral/regeneratable
+/srv/media/arr/sonarr/MediaCover
+/srv/media/arr/sonarr/Definitions
+/srv/media/arr/sonarr/logs
+/srv/media/arr/sonarr/Sentry
+/srv/media/arr/sonarr/asp
+/srv/media/arr/sonarr/Backups
+/srv/media/arr/radarr/MediaCover
+/srv/media/arr/radarr/Definitions
+/srv/media/arr/radarr/logs
+/srv/media/arr/radarr/Sentry
+/srv/media/arr/radarr/asp
+/srv/media/arr/radarr/Backups
+/srv/media/arr/prowlarr/Definitions
+/srv/media/arr/prowlarr/logs
+/srv/media/arr/prowlarr/Sentry
+/srv/media/arr/prowlarr/asp
+/srv/media/arr/prowlarr/Backups
+/srv/media/arr/bazarr/backup
+/srv/media/arr/bazarr/cache
+/srv/media/arr/bazarr/log
+/srv/media/arr/bazarr/restore
+
+# Jellyfin runtime (cache, logs, temp — not config or metadata)
+/srv/media/jellyfin/cache
+/srv/media/jellyfin/cache-backup
+/srv/media/jellyfin/config/log
+/srv/media/jellyfin/config/temp
+/srv/media/jellyfin/config/metadata/People
+
+# Game servers — binaries and logs (saves are included)
+/srv/game-servers/satisfactory/config/gamefiles
+/srv/game-servers/satisfactory/config/logs
+/srv/game-servers/satisfactory/config/backups
+/srv/game-servers/minecraft/modpacks
+
+# Stale/unused directories at repo root
+/srv/traefik
+/srv/org

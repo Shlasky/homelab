@@ -1,0 +1,63 @@
+groups:
+  - name: hardware_health
+    interval: 60s
+    rules:
+      # Critical: Drive SMART overall health failed
+      - alert: SmartDiskUnhealthy
+        expr: smartctl_device_smart_healthy == 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Drive {{ $labels.device }} failed SMART health check"
+          description: "Drive {{ $labels.device }} on {{ $labels.instance }} reports SMART overall health as failed."
+
+      # Critical: Reallocated sectors detected (early sign of drive failure)
+      - alert: SmartDiskReallocatedSectors
+        expr: smartctl_device_attribute{attribute_name="Reallocated_Sector_Ct",value_type="raw"} > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Drive {{ $labels.device }} has reallocated sectors"
+          description: "Drive {{ $labels.device }} has {{ $value }} reallocated sectors — indicates physical damage."
+
+      # Warning: Pending sectors (unstable sectors not yet reallocated)
+      - alert: SmartDiskPendingSectors
+        expr: smartctl_device_attribute{attribute_name="Current_Pending_Sector",value_type="raw"} > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Drive {{ $labels.device }} has pending sectors"
+          description: "Drive {{ $labels.device }} has {{ $value }} pending sectors waiting to be reallocated."
+
+      # Critical: Uncorrectable errors
+      - alert: SmartDiskUncorrectable
+        expr: smartctl_device_attribute{attribute_name="Offline_Uncorrectable",value_type="raw"} > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Drive {{ $labels.device }} has uncorrectable errors"
+          description: "Drive {{ $labels.device }} has {{ $value }} offline uncorrectable errors."
+
+      # Warning: Drive temperature high (>55°C)
+      - alert: SmartDiskHighTemp
+        expr: smartctl_device_attribute{attribute_name="Temperature_Celsius",value_type="raw"} > 55
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Drive {{ $labels.device }} temperature high"
+          description: "Drive {{ $labels.device }} temperature is {{ $value }}°C (threshold: 55°C)."
+
+      # Critical: Drive temperature critical (>65°C)
+      - alert: SmartDiskCriticalTemp
+        expr: smartctl_device_attribute{attribute_name="Temperature_Celsius",value_type="raw"} > 65
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Drive {{ $labels.device }} temperature critical"
+          description: "Drive {{ $labels.device }} temperature is {{ $value }}°C (threshold: 65°C) — risk of data loss."

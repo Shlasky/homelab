@@ -85,3 +85,19 @@ scrape_configs:
         labels:
           instance: 'mongodb'
           server: 'mothership'
+
+  # PostgreSQL Metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          instance: postgres
+          server: mothership
+
+  # SMART / Hardware Metrics
+  - job_name: 'smartctl'
+    static_configs:
+      - targets: ['smartctl-exporter:9633']
+        labels:
+          instance: smartctl
+          server: mothership

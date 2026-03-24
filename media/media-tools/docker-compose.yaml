@@ -4,11 +4,9 @@ services:
     image: jlesage/mkvtoolnix:latest
     container_name: mkvtoolnix
     restart: unless-stopped
-    environment:
-      - TZ=${TZ}
-      - USER_ID=1000
-      - GROUP_ID=1000
-      - UMASK=002
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./mkvtoolnix/config:/config
       - /mnt/media/jellyfin/media:/storage:rw
@@ -29,8 +27,9 @@ services:
     image: novinem/jellyfin-subsyncer
     container_name: ffsubsync
     restart: unless-stopped
-    environment:
-      - TZ=${TZ}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - /mnt/media/jellyfin/media:/media:rw
       - /mnt/downloads:/downloads:rw
@@ -42,10 +41,9 @@ services:
     image: tnk4on/yt-dlp:latest
     container_name: yt-dlp
     restart: unless-stopped
-    environment:
-      - TZ=${TZ}
-      - PUID=1000
-      - PGID=1000
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - /srv/media-tools/yt-dlp/config:/config
       - /srv/media-tools/yt-dlp/cookies:/cookies:ro
@@ -81,10 +79,9 @@ services:
     image: python:3.11-slim
     container_name: media-controller
     restart: unless-stopped
-    environment:
-      - TZ=${TZ}
-      - PUID=1000
-      - PGID=1000
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - /srv/media-tools/scripts:/scripts
       - /mnt/media/jellyfin/media:/media:rw

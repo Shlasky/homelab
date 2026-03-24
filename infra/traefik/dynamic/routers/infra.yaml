@@ -60,6 +60,11 @@ http:
       rule: "Host(`n8n.{{ env "DOMAIN" }}`)"
       service: n8n
 
+    vaultwarden:
+      <<: *admin-base
+      rule: "Host(`vault.{{ env "DOMAIN" }}`)"
+      service: vaultwarden
+
   services:
     mongo-express:
       loadBalancer:
@@ -105,6 +110,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://n8n:5678"
+
+    vaultwarden:
+      loadBalancer:
+        servers:
+          - url: "http://vaultwarden:80"
 
   middlewares:
     dashboard-auth:

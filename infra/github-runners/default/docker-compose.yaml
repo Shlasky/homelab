@@ -2,21 +2,9 @@ services:
   runner:
     image: myoung34/github-runner
     restart: always
-    environment:
-      # ORG Settings
-      - RUNNER_SCOPE=${RUNNER_SCOPE:-org}
-      - ORG_NAME=${ORG_NAME}
-      # - REPO_NAME="${REPO_NAME}"
-
-      # Runner config
-      - RUNNER_NAME_PREFIX=${RUNNER_NAME}
-      - RANDOM_RUNNER_SUFFIX=${RANDOM_RUNNER_SUFFIX:-true}
-      - RUNNER_WORKDIR=${RUNNER_WORKFIR:-/tmp/runner/work}
-      - RUNNER_GROUP=${RUNNER_GROUP:-default}
-      - LABELS=${LABELS:-shloud,linux}
-
-      # Auth token
-      - ACCESS_TOKEN=${ACCESS_TOKEN}
+    env_file:
+      - ../../../.env.base
+      - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/tmp/runner

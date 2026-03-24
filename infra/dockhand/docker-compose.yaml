@@ -3,8 +3,9 @@ services:
     image: fnsys/dockhand:latest
     container_name: dockhand
     restart: unless-stopped
-    environment:
-      - DATABASE_URL=postgres://${DOCKHAND_DB_USER}:${DOCKHAND_DB_PASSWORD}@postgres:5432/${DOCKHAND_DB_NAME}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data:/data

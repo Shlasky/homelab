@@ -3,7 +3,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     restart: unless-stopped
-    user: "1000:1000"  
+    user: "1000:1000"
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -24,11 +24,9 @@ services:
     container_name: grafana
     restart: unless-stopped
     user: "1000:1000"
-    environment:
-      - TZ=${TZ}
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
-      - GF_SERVER_ROOT_URL=https://monitor.${DOMAIN}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./grafana/data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
@@ -133,6 +131,25 @@ services:
       - "14268:14268"  # Jaeger ingest
     networks:
       - traefik_admin
+      - monitoring
+
+  smartctl-exporter:
+    image: prometheuscommunity/smartctl-exporter:latest
+    container_name: smartctl-exporter
+    restart: unless-stopped
+    user: root
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
+    command:
+      - '--smartctl.device=/dev/sda;sat'
+      - '--smartctl.device=/dev/sdb;sat'
+      - '--smartctl.device=/dev/nvme0;nvme'
+    devices:
+      - /dev/sda
+      - /dev/sdb
+      - /dev/nvme0
+    networks:
       - monitoring
 
 networks:

@@ -4,10 +4,9 @@ services:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     restart: unless-stopped
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./prowlarr:/config
     networks:
@@ -18,10 +17,9 @@ services:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     restart: unless-stopped
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./radarr:/config
       - /mnt/media/jellyfin/media/movies:/movies
@@ -36,10 +34,9 @@ services:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     restart: unless-stopped
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./sonarr:/config
       - /mnt/media/jellyfin/media/shows:/tv
@@ -54,10 +51,9 @@ services:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
     restart: unless-stopped
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
+    env_file:
+      - ../../.env.base
+      - .env
     volumes:
       - ./bazarr:/config
       - /mnt/media/jellyfin/media/movies:/movies

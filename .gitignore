@@ -16,6 +16,7 @@ Thumbs.db
 
 # Environment variables and secrets
 .env
+.env.base
 .env.local
 .env.*.local
 *.key

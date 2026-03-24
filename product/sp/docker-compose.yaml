@@ -1,13 +1,9 @@
 services:
   super-productivity:
     image: johannesjo/super-productivity:latest
-    environment:
-      WEBDAV_BASE_URL: http://webdav:2345 
-      WEBDAV_USERNAME: ${WEBDAV_USERNAME:-admin}
-      WEBDAV_SYNC_FOLDER_PATH: ${WEBDAV_SYNC_FOLDER_PATH:-/}
-      SYNC_INTERVAL: ${SYNC_INTERVAL:-15}
-      IS_COMPRESSION_ENABLED: ${IS_COMPRESSION_ENABLED:-true}
-      IS_ENCRYPTION_ENABLED: ${IS_ENCRYPTION_ENABLED:-false}
+    env_file:
+      - ../../.env.base
+      - .env
     networks:
       - traefik_public
       - super-productivity
