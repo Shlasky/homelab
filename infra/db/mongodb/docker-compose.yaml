@@ -11,8 +11,6 @@ services:
       - ./config:/data/configdb
     networks:
       - mongodb
-    ports:
-      - "27017:27017"
     command:
       - "--auth"
       - "--bind_ip_all"
