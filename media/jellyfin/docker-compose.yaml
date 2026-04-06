@@ -13,7 +13,6 @@ services:
       - /mnt/media/jellyfin/media:/media:ro  # Read-only for safety
     networks:
       - traefik_public
-      - traefik_admin
     devices:
       - /dev/dri:/dev/dri  # For Intel GPU transcoding
 
