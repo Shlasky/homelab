@@ -35,6 +35,11 @@ http:
       rule: "Host(`firefly.{{ env "DOMAIN" }}`)"
       service: firefly
 
+    home-assistant:
+      <<: *admin-base
+      rule: "Host(`ha.{{ env "DOMAIN" }}`)"
+      service: home-assistant
+
   services:
     homepage-admin:
       loadBalancer:
@@ -60,3 +65,8 @@ http:
       loadBalancer:
         servers:
           - url: "http://firefly-core:8080"
+
+    home-assistant:
+      loadBalancer:
+        servers:
+          - url: "http://home-assistant:8123"

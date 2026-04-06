@@ -125,3 +125,5 @@ wireguard.conf
 # n8n runtime data
 **/n8n/data/
 
+# Home Assistant config
+**/home-assistant/config/
